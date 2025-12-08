@@ -1,0 +1,56 @@
+<nav class="navbar navbar-expand-lg navbar-domino sticky-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="/">
+        <div style="background: #E31837; width: 40px; height: 40px; transform: rotate(45deg); display: flex; align-items: center; justify-content: center; margin-right: 15px; border-radius: 5px;">
+            <span style="color: white; transform: rotate(-45deg); font-weight: bold;">D</span>
+        </div>
+        <span style="color: #006491; font-weight: 800; font-size: 1.5rem;">DOMINO'S</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item"><a class="nav-link" href="/">หน้าหลัก</a></li>
+        <li class="nav-item"><a class="nav-link" href="/custom">ออกแบบพิซซ่าเอง</a></li>
+        
+        <li class="nav-item"><a class="nav-link" href="/branches">สาขาของเรา</a></li>
+        
+        <% if(user && user.role === 'admin') { %>
+            <li class="nav-item">
+                <a class="nav-link fw-bold text-danger" href="/admin"><i class="bi bi-gear-fill"></i> จัดการร้าน</a>
+            </li>
+        <% } %>
+      </ul>
+      
+      <div class="d-flex align-items-center gap-3">
+        <a href="/cart" class="btn btn-outline-primary position-relative rounded-pill px-4">
+          <i class="bi bi-basket-fill"></i> ตะกร้า
+          <% if(locals.cartCount > 0) { %>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              <%= cartCount %>
+            </span>
+          <% } %>
+        </a>
+
+        <% if (user) { %>
+            <div class="dropdown">
+                <button class="btn btn-primary rounded-pill px-4 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-fill"></i> <%= user.fullname %>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                    <li><a class="dropdown-item" href="/history"><i class="bi bi-clock-history"></i> ประวัติการสั่งซื้อ</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="/logout">ออกจากระบบ</a></li>
+                </ul>
+            </div>
+        <% } else { %>
+            <a href="/login" class="btn btn-link text-decoration-none" style="color: #006491; font-weight: bold;">เข้าสู่ระบบ</a>
+            <a href="/register" class="btn btn-danger rounded-pill px-4">สมัครสมาชิก</a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</nav>
