@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('partials/head') %>
+    <title>Admin Dashboard</title>
+</head>
+<body class="bg-light">
+    <%- include('partials/navbar') %>
+
+    <div class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title text-danger">👨‍🍳 Admin Dashboard - รายการออเดอร์</h2>
+            
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-dark p-2">Admin Access Only</span>
+                
+                <a href="/logout" class="btn btn-outline-danger btn-sm fw-bold">
+                    <i class="bi bi-box-arrow-right"></i> ออกจากระบบ
+                </a>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover bg-white shadow-sm rounded">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#Order</th>
+                        <th>ลูกค้า</th>
+                        <th>รายการสินค้า</th>
+                        <th>ราคารวม</th>
+                        <th>สถานะปัจจุบัน</th>
+                        <th>อัปเดตสถานะ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order => { %>
+                        <tr>
+                            <td>#<%= order.id %><br><small class="text-muted"><%= new Date(order.order_date).toLocaleTimeString('th-TH') %></small></td>
+                            <td><%= order.fullname %></td>
+                            <td>
+                                <ul class="list-unstyled small mb-0">
+                                    <% order.items.forEach(item => { %>
+                                        <li>- <%= item.product_name %> (x<%= item.qty %>)</li>
+                                    <% }) %>
+                                </ul>
+                            </td>
+                            <td class="fw-bold text-primary"><%= order.total_price %> ฿</td>
+                            <td>
+                                <% let badgeClass = 'bg-secondary';
+                                   if(order.status === 'Pending') badgeClass = 'bg-warning text-dark';
+                                   if(order.status === 'Baking') badgeClass = 'bg-primary';
+                                   if(order.status === 'Delivering') badgeClass = 'bg-info text-dark';
+                                   if(order.status === 'Completed') badgeClass = 'bg-success';
+                                   if(order.status === 'Cancelled') badgeClass = 'bg-danger';
+                                %>
+                                <span class="badge <%= badgeClass %>"><%= order.status %></span>
+                            </td>
+                            <td>
+                                <form action="/admin/update-status" method="POST" class="d-flex gap-2">
+                                    <input type="hidden" name="order_id" value="<%= order.id %>">
+                                    <select name="status" class="form-select form-select-sm" style="width: 120px;">
+                                        <option value="Pending" <%= order.status=='Pending'?'selected':'' %>>Pending</option>
+                                        <option value="Baking" <%= order.status=='Baking'?'selected':'' %>>Baking</option>
+                                        <option value="Delivering" <%= order.status=='Delivering'?'selected':'' %>>Delivering</option>
+                                        <option value="Completed" <%= order.status=='Completed'?'selected':'' %>>Completed</option>
+                                        <option value="Cancelled" <%= order.status=='Cancelled'?'selected':'' %>>Cancelled</option>
+                                    </select>
+                                    <button class="btn btn-sm btn-outline-success">Save</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

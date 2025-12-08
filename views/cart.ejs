@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('partials/head') %>
+    <title>ตะกร้าสินค้า</title>
+</head>
+<body class="bg-light">
+    <%- include('partials/navbar') %>
+    <div class="container my-5">
+        <h2 class="fw-bold mb-4">🛒 ตะกร้าสินค้า</h2>
+        
+        <table class="table table-bordered bg-white">
+            <thead class="table-light">
+                <tr><th>สินค้า</th><th>แคลอรี่/ชิ้น</th><th>ราคา</th><th>จำนวน</th><th>รวม</th></tr>
+            </thead>
+            <tbody>
+                <% cart.forEach((item, index) => { %>
+                    <tr>
+                        <td><%= item.name %></td>
+                        <td><%= item.calories %></td>
+                        <td><%= item.price %></td>
+                        <td style="width: 150px;">
+                            <form action="/update-cart" method="POST" class="d-flex">
+                                <input type="hidden" name="index" value="<%= index %>">
+                                <button name="action" value="decrease" class="btn btn-sm btn-outline-danger">-</button>
+                                <span class="mx-2"><%= item.qty %></span>
+                                <button name="action" value="increase" class="btn btn-sm btn-outline-success">+</button>
+                            </form>
+                        </td>
+                        <td><%= item.price * item.qty %> ฿</td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-end align-items-center gap-4 p-3 bg-white border">
+            <h4>Total Calories: <span class="text-muted"><%= totalCal %></span></h4>
+            <h3 class="text-danger">Total: <%= totalPrice %> ฿</h3>
+            <form action="/checkout" method="POST">
+                <button class="btn btn-lg btn-primary">ชำระเงิน</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

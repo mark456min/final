@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('partials/head') %>
+    <title>ออกแบบพิซซ่า - Step by Step</title>
+    <style>
+        .step-content { display: none; animation: fadeIn 0.4s; }
+        .step-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* --- CSS ที่แก้ใหม่ --- */
+        .ingredient-card {
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid #eee;
+            background: white;
+            position: relative; /* เพื่อให้ Z-index ทำงานถูกต้อง */
+        }
+        .ingredient-card:hover {
+            border-color: #aaa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* ซ่อน Input ตัวจริงไว้ด้านหลัง (แก้ให้กดติดง่ายขึ้น) */
+        .hidden-input {
+            position: absolute;
+            z-index: -1;
+            opacity: 0;
+        }
+
+        /* เมื่อ Input ถูกเลือก -> เปลี่ยนสี Card */
+        .hidden-input:checked + label .ingredient-card {
+            border-color: #006491;
+            background-color: #f0f8ff;
+            box-shadow: 0 0 0 2px rgba(0,100,145,0.2);
+        }
+        /* สีพิเศษสำหรับซอส */
+        .hidden-input[name="sauce"]:checked + label .ingredient-card {
+            border-color: #E31837;
+            background-color: #fff0f0;
+            box-shadow: 0 0 0 2px rgba(227, 24, 55, 0.2);
+        }
+        /* สีพิเศษสำหรับท็อปปิ้ง */
+        .hidden-input[name="topping"]:checked + label .ingredient-card, /* กรณี name="topping" */
+        .topping:checked + label .ingredient-card {
+            border-color: #198754;
+            background-color: #f0fff4;
+            box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <%- include('partials/navbar') %>
+
+    <div class="container my-5 pb-5">
+        
+        <div class="text-center mb-4">
+            <h2 class="fw-bold" style="color: #006491;">🛠 สร้างพิซซ่าตามใจคุณ</h2>
+            <div class="progress mt-3 mx-auto" style="height: 10px; max-width: 600px;">
+                <div id="progressBar" class="progress-bar bg-danger" role="progressbar" style="width: 33%;"></div>
+            </div>
+            <p class="text-muted mt-2 small">ขั้นตอนที่ <span id="currentStepNum">1</span> จาก 3</p>
+        </div>
+        
+        <form action="/add-to-cart" method="POST" id="customForm">
+            <input type="hidden" name="name" value="Custom Pizza">
+            
+            <div class="step-content active" id="step1">
+                <div class="mx-auto" style="max-width: 700px;">
+                    <h4 class="text-primary mb-3 text-center">1. เลือกแป้งที่ชอบ</h4>
+                    <div class="row g-3">
+                        <% crusts.forEach((c, i) => { %>
+                            <div class="col-md-6">
+                                <input class="hidden-input" type="radio" name="crust" id="c_<%= i %>" value="<%= c.calories %>" data-price="<%= c.price %>" <%= i===0?'checked':'' %> onchange="calc()">
+                                <label class="w-100" for="c_<%= i %>">
+                                    <div class="ingredient-card p-3 rounded d-flex align-items-center gap-3">
+                                        <img src="<%= c.image_url || 'https://via.placeholder.com/64' %>" width="64" height="64" class="rounded-circle object-fit-cover bg-light">
+                                        <div class="flex-grow-1">
+                                            <h5 class="mb-0 fw-bold text-dark"><%= c.name %></h5>
+                                            <small class="text-muted"><%= c.calories %> kcal</small>
+                                        </div>
+                                        <div class="text-primary fw-bold">+<%= c.price %>฿</div>
+                                    </div>
+                                </label>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-content" id="step2">
+                <div class="mx-auto" style="max-width: 700px;">
+                    <h4 class="text-danger mb-3 text-center">2. เลือกซอส</h4>
+                    <div class="row g-3">
+                        <% sauces.forEach((s, i) => { %>
+                            <div class="col-md-6">
+                                <input class="hidden-input" type="radio" name="sauce" id="s_<%= i %>" value="<%= s.calories %>" data-price="<%= s.price %>" <%= i===0?'checked':'' %> onchange="calc()">
+                                <label class="w-100" for="s_<%= i %>">
+                                    <div class="ingredient-card p-3 rounded d-flex align-items-center gap-3">
+                                        <img src="<%= s.image_url || 'https://via.placeholder.com/64' %>" width="64" height="64" class="rounded-circle object-fit-cover bg-light">
+                                        <div class="flex-grow-1">
+                                            <h5 class="mb-0 fw-bold text-dark"><%= s.name %></h5>
+                                            <small class="text-muted"><%= s.calories %> kcal</small>
+                                        </div>
+                                        <div class="text-danger fw-bold">+<%= s.price %>฿</div>
+                                    </div>
+                                </label>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-content" id="step3">
+                <div class="mx-auto" style="max-width: 800px;">
+                    <h4 class="text-success mb-3 text-center">3. เลือกหน้า (เลือกได้หลายอย่าง)</h4>
+                    <div class="row g-3">
+                        <% toppings.forEach((t, i) => { %>
+                            <div class="col-6 col-md-4">
+                                <input class="hidden-input topping" type="checkbox" id="t_<%= i %>" value="<%= t.calories %>" data-price="<%= t.price %>" onchange="calc()">
+                                <label class="w-100" for="t_<%= i %>">
+                                    <div class="ingredient-card p-3 rounded text-center h-100">
+                                        <img src="<%= t.image_url || 'https://via.placeholder.com/64' %>" width="80" height="80" class="rounded-circle mb-2 object-fit-cover bg-light">
+                                        <h6 class="mb-1 fw-bold text-dark"><%= t.name %></h6>
+                                        <div class="text-muted small mb-1"><%= t.calories %> kcal</div>
+                                        <div class="badge bg-success bg-opacity-10 text-success border border-success">+<%= t.price %>฿</div>
+                                    </div>
+                                </label>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fixed-bottom bg-white shadow-lg p-3 border-top" style="z-index: 1000;">
+                <div class="container d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0 fw-bold text-dark">
+                            💰 <span id="price">0</span> ฿ 
+                            <span class="text-muted fs-6 fw-normal">| 🔥 <span id="cal">0</span> kcal</span>
+                        </h4>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" id="prevBtn" class="btn btn-outline-secondary px-4 rounded-pill" onclick="changeStep(-1)" disabled>
+                            <i class="bi bi-arrow-left"></i> ย้อนกลับ
+                        </button>
+
+                        <button type="button" id="nextBtn" class="btn btn-primary px-4 rounded-pill" onclick="changeStep(1)">
+                            ถัดไป <i class="bi bi-arrow-right"></i>
+                        </button>
+
+                        <div id="submitContainer" class="d-none d-flex align-items-center gap-2">
+                            <input type="number" name="qty" value="1" min="1" class="form-control text-center rounded-pill" style="width: 70px;">
+                            <button type="submit" class="btn btn-warning px-4 rounded-pill fw-bold text-white shadow-sm">
+                                <i class="bi bi-cart-plus"></i> ใส่ตะกร้า
+                            </button>
+                        </div>
+                        
+                        <input type="hidden" name="calories" id="inputCal">
+                        <input type="hidden" name="price" id="inputPrice">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        const steps = document.querySelectorAll('.step-content');
+        const progressBar = document.getElementById('progressBar');
+        const currentStepNum = document.getElementById('currentStepNum');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const submitContainer = document.getElementById('submitContainer');
+
+        function changeStep(n) {
+            steps[currentStep].classList.remove('active');
+            currentStep += n;
+            steps[currentStep].classList.add('active');
+            updateUI();
+        }
+
+        function updateUI() {
+            const percent = ((currentStep + 1) / steps.length) * 100;
+            progressBar.style.width = percent + '%';
+            currentStepNum.innerText = currentStep + 1;
+            prevBtn.disabled = (currentStep === 0);
+
+            if (currentStep === steps.length - 1) {
+                nextBtn.classList.add('d-none');
+                submitContainer.classList.remove('d-none');
+            } else {
+                nextBtn.classList.remove('d-none');
+                submitContainer.classList.add('d-none');
+            }
+        }
+
+        function calc() {
+            let c = 0, p = 0;
+            document.querySelectorAll('input:checked').forEach(e => {
+                c += parseInt(e.value || 0);
+                p += parseInt(e.dataset.price || 0);
+            });
+            document.getElementById('cal').innerText = c;
+            document.getElementById('price').innerText = p;
+            document.getElementById('inputCal').value = c;
+            document.getElementById('inputPrice').value = p;
+        }
+
+        calc();
+        updateUI();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

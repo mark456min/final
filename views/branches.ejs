@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('partials/head') %>
+    <title>ค้นหาสาขาใกล้คุณ</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 15px;
+            z-index: 1;
+        }
+        .branch-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .branch-item {
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .branch-item:hover {
+            background-color: #f0f8ff;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <%- include('partials/navbar') %>
+
+    <div class="container my-5">
+        <div class="text-center mb-4">
+            <h2 class="section-title">📍 สาขาของเรา</h2>
+            <p class="text-muted">ค้นหาสาขา Domino's Pizza ใกล้บ้านคุณ</p>
+        </div>
+
+        <div id="branch-data-store" class="d-none" data-branches='<%- JSON.stringify(branches) %>'></div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white fw-bold">
+                        <i class="bi bi-list-ul"></i> รายชื่อสาขา
+                    </div>
+                    <div class="list-group list-group-flush branch-list">
+                        <% branches.forEach((branch, index) => { %>
+                            <div class="list-group-item branch-item p-3" onclick="focusMap(<%= branch.lat %>, <%= branch.lng %>)">
+                                <h6 class="fw-bold text-primary mb-1"><%= branch.name %></h6>
+                                <p class="text-muted small mb-0">
+                                    <i class="bi bi-geo-alt-fill text-danger"></i> <%= branch.address %>
+                                </p>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm p-2">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // 1. เริ่มต้นแผนที่
+        const map = L.map('map').setView([13.7563, 100.5018], 11);
+
+        // 2. ใส่ลายแผนที่
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // 3. ไอคอนหมุด
+        const pizzaIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+            iconSize: [38, 38],
+            iconAnchor: [19, 38],
+            popupAnchor: [0, -38]
+        });
+
+        // 🔥 จุดแก้ไขสำคัญ: ดึงข้อมูลจาก HTML Attribute แทนการยัด EJS โดยตรง
+        // 1. ดึง element ที่ซ่อนไว้
+        const dataElement = document.getElementById('branch-data-store');
+        // 2. ดึงค่า string จาก attribute 'data-branches'
+        const rawData = dataElement.getAttribute('data-branches');
+        // 3. แปลงเป็น JSON Object
+        const branches = JSON.parse(rawData);
+
+        // 4. วนลูปปักหมุดตามปกติ
+        branches.forEach(b => {
+            const marker = L.marker([b.lat, b.lng], {icon: pizzaIcon}).addTo(map);
+            
+            marker.bindPopup(`
+                <div class="text-center">
+                    <h6 class="fw-bold text-primary">${b.name}</h6>
+                    <p class="small mb-2">${b.address}</p>
+                    <a href="https://www.google.com/maps/search/?api=1&query=${b.lat},${b.lng}" target="_blank" class="btn btn-sm btn-danger rounded-pill w-100">
+                        <i class="bi bi-cursor-fill"></i> นำทาง
+                    </a>
+                </div>
+            `);
+        });
+
+        // 5. ฟังก์ชันโฟกัสแผนที่
+        function focusMap(lat, lng) {
+            map.flyTo([lat, lng], 15, {
+                duration: 1.5
+            });
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
