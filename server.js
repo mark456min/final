@@ -55,7 +55,7 @@ app.use((req, res, next) => {
 app.get('/', async (req, res) => {
     try {
         const [banners] = await db.query('SELECT * FROM banners');
-        const [products] = await db.query('SELECT * FROM products');
+        const [products] = await db.query('SELECT * FROM products WHERE is_active = 1');
         const [combos] = await db.query('SELECT * FROM combos');
         const [count] = await db.query('SELECT COUNT(*) AS c FROM counter');
         
