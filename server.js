@@ -20,10 +20,10 @@ app.use(session({
 const pool = mysql.createPool({
     connectionLimit: 10,
     // เช็คค่าจาก Cloud ก่อน -> ถ้าไม่มีให้ใช้ค่าจาก Render -> ถ้าไม่มีให้ใช้ localhost
-    host: process.env.MYSQL_ADDON_HOST || process.env.DB_HOST || 'brttxn4lfdmo6hs3iwf8-mysql.services.clever-cloud.com',
-    user: process.env.MYSQL_ADDON_USER || process.env.DB_USER || 'u14ibqankfctnyaf',
-    password: process.env.MYSQL_ADDON_PASSWORD || process.env.DB_PASSWORD || 'd6SKKV6hnfRt3WsygB0e',
-    database: process.env.MYSQL_ADDON_DB || process.env.DB_NAME || 'brttxn4lfdmo6hs3iwf8', // <--- จุดสำคัญที่แก้ให้ครับ
+    host: process.env.MYSQL_ADDON_HOST || process.env.DB_HOST || 'bj70b2x2vs64bma7jdbi-mysql.services.clever-cloud.com',
+    user: process.env.MYSQL_ADDON_USER || process.env.DB_USER || 'udntbhy3drgbfzjt',
+    password: process.env.MYSQL_ADDON_PASSWORD || process.env.DB_PASSWORD || 'tMI0UXgxS0NtBwylnOou',
+    database: process.env.MYSQL_ADDON_DB || process.env.DB_NAME || 'bj70b2x2vs64bma7jdbi', // <--- จุดสำคัญที่แก้ให้ครับ
     port: process.env.MYSQL_ADDON_PORT || process.env.DB_PORT || 3306,
     waitForConnections: true,
     queueLimit: 0
